@@ -2,10 +2,25 @@
 
 ## 1. System Design
 
+Three core user actions:
+The user should be able to add and manage their pet’s information, such as the pet’s name, species, age, and care preferences.
+The user should be able to create and manage pet care tasks, such as feeding, walking, medication, grooming, or enrichment, including duration and priority.
+The user should be able to generate and view a daily care plan based on available time, task priority, and owner preferences, with a short explanation of why certain tasks were selected.
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+
+For my initial design, I chose four main classes: Owner, Pet, Task, and Scheduler.
+
+The Owner class is responsible for storing information about the pet owner, including their name, available time, preferences, and the pets they manage. I included this class because the scenario says the schedule should consider the owner's time and preferences.
+
+The Pet class is responsible for storing information about the pet, such as its name, species, age, and care tasks. This class acts as the main container for the tasks related to a specific pet.
+
+The Task class represents an individual pet care activity, such as feeding, walking, medication, grooming, or enrichment. It stores important scheduling information like duration, priority, completion status, and optional notes.
+
+The Scheduler class is responsible for generating a daily plan. It uses the owner's available time and the pet's task list to decide which tasks should be included in the final daily schedule. I also gave it an explanation method so the system can describe why certain tasks were chosen.
 
 **b. Design changes**
 
