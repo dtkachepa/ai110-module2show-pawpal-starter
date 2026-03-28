@@ -25,6 +25,7 @@ The Scheduler class is responsible for generating a daily plan. It uses the owne
 **b. Design changes**
 
 - Did your design change during implementation?
+No, it hasn't changed yet. 
 - If yes, describe at least one change and why you made it.
 
 ---
