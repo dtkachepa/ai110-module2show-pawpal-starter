@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections import defaultdict
+from datetime import date, timedelta
 from dataclasses import dataclass, field
 from typing import List
 
@@ -8,6 +10,7 @@ from typing import List
 class Task:
     description: str
     time: str
+    due_date: date
     duration: int
     frequency: str
     priority: int
@@ -20,6 +23,24 @@ class Task:
     def update_priority(self, priority: int) -> None:
         """Update the task priority."""
         self.priority = priority
+
+    def create_next_recurring_task(self) -> Task | None:
+        """Create the next task instance for daily or weekly recurring tasks."""
+        if self.frequency == "daily":
+            next_due_date = self.due_date + timedelta(days=1)
+        elif self.frequency == "weekly":
+            next_due_date = self.due_date + timedelta(days=7)
+        else:
+            return None
+
+        return Task(
+            description=self.description,
+            time=self.time,
+            due_date=next_due_date,
+            duration=self.duration,
+            frequency=self.frequency,
+            priority=self.priority,
+        )
 
 
 @dataclass
@@ -36,6 +57,16 @@ class Pet:
     def get_tasks(self) -> List[Task]:
         """Return the pet's tasks."""
         return self.tasks
+
+    def complete_task(self, task: Task) -> None:
+        """Complete a task and add the next recurring task if needed."""
+        if task.completed:
+            return
+
+        task.mark_complete()
+        next_task = task.create_next_recurring_task()
+        if next_task is not None:
+            self.add_task(next_task)
 
 
 class Owner:
@@ -68,6 +99,24 @@ class Scheduler:
         """Store the owner used for scheduling."""
         self.owner = owner
 
+    def filter_tasks_by_completion(
+        self, tasks: List[Task], completed: bool
+    ) -> List[Task]:
+        """Return tasks that match the requested completion status."""
+        return [task for task in tasks if task.completed == completed]
+
+    def filter_tasks_by_pet_name(
+        self, pet_name: str, completed: bool | None = None
+    ) -> List[Task]:
+        """Return tasks for one pet, with optional completion filtering."""
+        for pet in self.owner.pets:
+            if pet.name == pet_name:
+                tasks = pet.get_tasks()
+                if completed is None:
+                    return tasks
+                return self.filter_tasks_by_completion(tasks, completed)
+        return []
+
     def sort_tasks_by_priority(self, tasks: List[Task]) -> List[Task]:
         """Sort tasks by priority."""
         return sorted(tasks, key=lambda task: task.priority)
@@ -84,11 +133,58 @@ class Scheduler:
                 used_time += task.duration
         return selected_tasks
 
+    def _is_shared_species_task(
+        self, scheduled_items: List[tuple[Pet, Task]]
+    ) -> bool:
+        """Allow simple shared tasks for 2 to 5 pets of the same species."""
+        if len(scheduled_items) < 2 or len(scheduled_items) > 5:
+            return False
+
+        species = {pet.species.lower() for pet, _ in scheduled_items}
+        descriptions = {task.description.lower() for _, task in scheduled_items}
+
+        if len(species) != 1 or len(descriptions) != 1:
+            return False
+
+        shared_keywords = ("walk", "feed")
+        description = scheduled_items[0][1].description.lower()
+        return any(keyword in description for keyword in shared_keywords)
+
+    def get_conflict_warnings(
+        self, schedule: dict[str, List[Task]]
+    ) -> List[str]:
+        """Return readable warnings for tasks scheduled at the same time."""
+        tasks_by_time: dict[str, List[tuple[Pet, Task]]] = defaultdict(list)
+
+        for pet in self.owner.pets:
+            for task in schedule.get(pet.name, []):
+                tasks_by_time[task.time].append((pet, task))
+
+        warnings: List[str] = []
+        for time, scheduled_items in tasks_by_time.items():
+            if len(scheduled_items) <= 1:
+                continue
+
+            if self._is_shared_species_task(scheduled_items):
+                continue
+
+            conflict_details = ", ".join(
+                f"{pet.name} - {task.description}" for pet, task in scheduled_items
+            )
+            warnings.append(f"Conflict at {time}: {conflict_details}")
+
+        return warnings
+
     def get_todays_schedule(self) -> dict[str, List[Task]]:
         """Build today's schedule for each pet."""
         schedule: dict[str, List[Task]] = {}
+        today = date.today()
         for pet in self.owner.pets:
-            incomplete_tasks = [task for task in pet.get_tasks() if not task.completed]
+            incomplete_tasks = [
+                task
+                for task in pet.get_tasks()
+                if not task.completed and task.due_date <= today
+            ]
             sorted_tasks = self.sort_tasks_by_priority(incomplete_tasks)
             schedule[pet.name] = self.filter_tasks_by_available_time(
                 sorted_tasks, self.owner.available_time

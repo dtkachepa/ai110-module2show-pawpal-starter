@@ -42,6 +42,7 @@ No, it hasn't changed yet.
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+One tradeoff in my scheduler is that when a recurring task is completed, the system creates a new task instance for the next occurrence instead of updating the same task repeatedly. I chose this because it makes each completed task easy to track and keeps the recurrence logic simple. The downside is that the task list can grow over time, since old completed tasks remain in memory. A more advanced version might store recurrence separately from task history, but that would be harder to build and explain in this project.
 ---
 
 ## 3. AI Collaboration
