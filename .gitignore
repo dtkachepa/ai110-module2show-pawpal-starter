@@ -1,5 +1,12 @@
 __pycache__/
+*.py[cod]
 .venv/
 .venv_new/
 .pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.streamlit/secrets.toml
 .DS_Store
