@@ -52,3 +52,15 @@ PawPal+ now includes a few simple scheduling improvements:
 - The scheduler can generate conflict warnings when multiple tasks are scheduled at the same exact time.
 
 The conflict checker also allows a small shared-task exception for 2 to 5 pets of the same species, such as walking or feeding multiple dogs at the same time.
+
+## Testing PawPal+
+
+Run the current test suite with:
+
+```bash
+.\.venv\Scripts\python.exe -m pytest tests\test_pawpal.py
+```
+
+The tests currently cover core backend behaviors: marking tasks complete, adding tasks to pets, returning tasks in chronological order, building a daily schedule from overdue and due-today incomplete tasks, creating the next daily recurring task, detecting scheduling conflicts, and allowing valid shared walk/feed tasks for pets of the same species.
+
+Current reliability confidence: `★★★★☆` (4/5). The main scheduling rules are covered, but the project still has a small student-project test surface and could use more edge-case coverage over time.
