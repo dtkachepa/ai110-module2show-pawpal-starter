@@ -1,0 +1,49 @@
+
+classDiagram
+    class Task {
+        +str description
+        +str time
+        +datetime due_datetime
+        +int duration
+        +str frequency
+        +int priority
+        +bool completed
+        +mark_complete() None
+        +create_task(description: str, time: str, duration: int, frequency: str, priority: int) Task
+        +get_initial_due_datetime(time: str, frequency: str) datetime
+        +create_next_recurring_task() Task|None
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +List~Task~ tasks
+        +add_task(task: Task) None
+        +get_tasks() List~Task~
+        +complete_task(task: Task) None
+    }
+
+    class Owner {
+        +str name
+        +int available_time
+        +List~Pet~ pets
+        +add_pet(pet: Pet) None
+    }
+
+    class Scheduler {
+        +Owner owner
+        +filter_tasks_by_completion(tasks: List~Task~, completed: bool) List~Task~
+        +filter_tasks_by_pet_name(pet_name: str, completed: bool|None) List~Task~
+        +sort_tasks_by_priority(tasks: List~Task~) List~Task~
+        +filter_tasks_by_available_time(tasks: List~Task~, available_time: int) List~Task~
+        +get_conflict_warnings(schedule: dict~str, List~Task~~) List~str~
+        +get_todays_schedule() dict~str, List~Task~~
+        -_is_shared_species_task(scheduled_items: List~tuple~Pet, Task~~) bool
+    }
+
+    Owner "1" o-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
+    Scheduler --> Owner : schedules for
+    Scheduler ..> Pet : reads tasks from
+    Scheduler ..> Task : sorts / filters / detects conflicts

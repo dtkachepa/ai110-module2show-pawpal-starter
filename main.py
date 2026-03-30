@@ -68,7 +68,7 @@ def print_conflict_warnings(warnings: list[str]) -> None:
 
 def main() -> None:
     """Build sample PawPal+ data and print a demo schedule summary."""
-    owner = Owner("Alex", available_time=60, preferences=["short tasks first"])
+    owner = Owner("Alex", available_time=60)
 
     bella = Pet("Bella", "Dog", 4)
     rocky = Pet("Rocky", "Dog", 5)

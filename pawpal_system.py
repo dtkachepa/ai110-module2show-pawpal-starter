@@ -22,10 +22,6 @@ class Task:
         """Set the task's completion flag to True."""
         self.completed = True
 
-    def update_priority(self, priority: int) -> None:
-        """Replace the task's current priority value."""
-        self.priority = priority
-
     @classmethod
     def create_task(
         cls,
@@ -104,25 +100,15 @@ class Owner:
         self,
         name: str,
         available_time: int,
-        preferences: List[str] | None = None,
         pets: List[Pet] | None = None,
     ) -> None:
         self.name = name
         self.available_time = available_time
-        self.preferences = preferences if preferences is not None else []
         self.pets = pets if pets is not None else []
 
     def add_pet(self, pet: Pet) -> None:
         """Add a pet to the owner's household."""
         self.pets.append(pet)
-
-    def get_all_tasks(self) -> dict[str, List[Task]]:
-        """Return every pet's tasks grouped by pet name."""
-        all_tasks: dict[str, List[Task]] = {}
-        for pet in self.pets:
-            all_tasks[pet.name] = pet.get_tasks()
-        return all_tasks
-
 
 class Scheduler:
     def __init__(self, owner: Owner) -> None:
